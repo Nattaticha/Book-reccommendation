@@ -8,11 +8,11 @@ MODEL_PATH = "C:/Users/ASUS/Desktop/ml/model/"
 DATA_PATH = "C:/Users/ASUS/Desktop/ml/templates/"
 
 # โหลดโมเดลและข้อมูลที่จำเป็น
-popular_df = pickle.load(open(f'{MODEL_PATH}popular.pkl', 'rb'))
-pt = pickle.load(open(f'{MODEL_PATH}pt.pkl', 'rb'))
-books = pickle.load(open(f'{MODEL_PATH}books.pkl', 'rb'))
-similarity_scores = pickle.load(open(f'{MODEL_PATH}similarity_scores.pkl', 'rb'))
-df = pd.read_csv(f'{DATA_PATH}Books.csv', encoding='utf-8')
+popular_df = pickle.load(open('C:/Users/ASUS/Desktop/ml/model/popular.pkl', 'rb'))
+pt = pickle.load(open('C:/Users/ASUS/Desktop/ml/model/pt.pkl', 'rb'))
+books = pickle.load(open('C:/Users/ASUS/Desktop/ml/model/books.pkl', 'rb'))
+similarity_scores = pickle.load(open('C:/Users/ASUS/Desktop/ml/model/similarity_scores.pkl', 'rb'))
+df = pd.read_csv('C:/Users/ASUS/Desktop/ml/templates/Books.csv', encoding='utf-8')
 
 # สร้างรายการชื่อหนังสือจาก pt.index
 book_titles = list(pt.index)
