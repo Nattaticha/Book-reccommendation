@@ -3,48 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <title>Book Recommender System</title>
-    <!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #141414;
+            color: white;
+        }
+        .navbar {
+            background-color: #0f1a62 !important;
+        }
+        .text-navy {
+            color: #f1c40f;
+        }
+        .book-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 4 คอลัมน์ */
+            gap: 25px;
+            padding: 20px;
+            max-width: 1100px;
+            margin: auto;
+        }
+        .book-card {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease-in-out;
+            max-width: 200px;
+            border: 3px solid transparent;
+            border-radius: 10px;
+        }
+        .book-card img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .book-info {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            border-radius: 0 0 10px 10px;
+        }
+        .book-card:hover .book-info {
+            opacity: 1;
+        }
+        .selected {
+            border: 3px solid #f1c40f; /* ขอบสีทองเมื่อเลือก */
+            transform: scale(1.05);
+        }
+        .btn-recommend {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #f1c40f;
+            color: #141414;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .btn-recommend:disabled {
+            background-color: grey;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
-<style>
-    .text-navy{
-        color:#0f1a62
-    }
-</style>
-<body style="background-color:rgb(253, 247, 232)">
+<body>
 
-    <nav class="navbar" style="background-color:#0f1a62">
-        <a class="navbar-brand">My Book recommender</a>
+    <nav class="navbar navbar-dark">
+        <a class="navbar-brand text-white">My Book Recommender</a>
         <ul class="nav navbar-nav">
-            <li><a href="/">Home</a></li>
-            <li><a href="/recommend">Recommend</a></li>
-            <li><a>Contact</a></li>
+            <li><a href="/" class="text-white">Home</a></li>
+            <li><a href="/recommend" class="text-white">Recommend</a></li>
+            <li><a href="#" class="text-white">Contact</a></li>
         </ul>
     </nav>
 
     <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <h1 class="text-navy" style="font-size:50px">Book Recomenation</h1>
-            </div>
-
+        <h1 class="text-navy text-center" style="margin-top: 20px;">Select up to 5 Books</h1>
+        <div class="book-grid">
             {% for i in range(book_name|length) %}
-                <div class="col-md-3" style="margin-top:50px">
-                    <div class="card">
-                        <div class="card-body">
-                            <img class="card-img-top" src="{{ image[i] }}">
-                            <p class="text-navy">{{ book_name[i] }}</p>
-                            <h4 class="text-navy">{{ author[i] }}</h4>
-                            <!-- <h4 class="text-navy">Votes - {{ votes[i] }}</h4> -->
-                            <!-- <h4 class="text-navy">Rating - <i class="fa-solid fa-star"></i>{{ rating[i] }}</h4> -->
-                        </div>
+                <div class="book-card" onclick="selectBook(this, '{{ book_name[i] }}')">
+                    <img src="{{ image[i] }}" alt="Book Cover">
+                    <div class="book-info">
+                        <p class="text-navy" style="font-size: 16px;">{{ book_name[i] }}</p>
+                        <h5>{{ author[i] }}</h5>
                     </div>
                 </div>
             {% endfor %}
-
-
         </div>
+        <button class="btn-recommend" id="recommendBtn" onclick="getRecommendations()" disabled>Get Recommendations</button>
     </div>
+
+    <script>
+        let selectedBooks = [];
+
+        function selectBook(card, bookName) {
+            if (selectedBooks.includes(bookName)) {
+                // ถ้าเลือกแล้ว → เอาออก
+                selectedBooks = selectedBooks.filter(name => name !== bookName);
+                card.classList.remove('selected');
+            } else {
+                // ถ้ายังไม่ครบ 5 → เพิ่มเข้าไป
+                if (selectedBooks.length < 5) {
+                    selectedBooks.push(bookName);
+                    card.classList.add('selected');
+                }
+            }
+
+            // ถ้าเลือกได้ 1 เล่มขึ้นไป เปิดปุ่ม
+            document.getElementById("recommendBtn").disabled = selectedBooks.length === 0;
+        }
+
+        function getRecommendations() {
+            if (selectedBooks.length > 0) {
+                let query = selectedBooks.join(",");
+                window.location.href = `/recommend?selected_books=${query}`;
+            }
+        }
+    </script>
 
 </body>
 </html>
