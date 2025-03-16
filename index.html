@@ -55,21 +55,34 @@
             border: 3px solid #f1c40f; /* ขอบสีทองเมื่อเลือก */
             transform: scale(1.05);
         }
-        .btn-recommend {
-            display: block;
-            margin: 20px auto;
+        .btn-recommend, .btn-reset {
+            display: inline-block;
+            margin: 20px 10px;
             padding: 10px 20px;
             font-size: 18px;
-            background-color: #f1c40f;
-            color: #141414;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             text-align: center;
         }
+        .btn-recommend {
+            background-color: #f1c40f;
+            color: #141414;
+        }
         .btn-recommend:disabled {
             background-color: grey;
             cursor: not-allowed;
+        }
+        .btn-reset {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .btn-reset:hover {
+            background-color: #c0392b;
+        }
+        #recommendationResults {
+            margin-top: 30px;
+            text-align: center;
         }
     </style>
 </head>
@@ -79,10 +92,11 @@
         <a class="navbar-brand text-white">My Book Recommender</a>
         <ul class="nav navbar-nav">
             <li><a href="/" class="text-white">Home</a></li>
-            <li><a href="/recommend" class="text-white">Recommend</a></li>
-            <li><a href="#" class="text-white">Contact</a></li>
+            <li><a href="/recommend" class="text-white">Recommend</a></li>  <!-- ✅ แก้จาก href="#" เป็น /recommend -->
+            <li><a href="/contact" class="text-white">Contact</a></li>
         </ul>
     </nav>
+    
 
     <div class="container">
         <h1 class="text-navy text-center" style="margin-top: 20px;">Select up to 5 Books</h1>
@@ -97,7 +111,14 @@
                 </div>
             {% endfor %}
         </div>
-        <button class="btn-recommend" id="recommendBtn" onclick="getRecommendations()" disabled>Get Recommendations</button>
+
+        <div class="text-center">
+            <button class="btn-recommend" id="recommendBtn" onclick="getRecommendations()" disabled>Get Recommendations</button>
+            <button class="btn-reset" id="resetBtn" onclick="resetSelection()">Reset Selection</button>
+        </div>
+
+        <!-- แสดงผลลัพธ์หนังสือแนะนำ -->
+        <div id="recommendationResults"></div>
     </div>
 
     <script>
@@ -122,9 +143,64 @@
 
         function getRecommendations() {
             if (selectedBooks.length > 0) {
-                let query = selectedBooks.join(",");
-                window.location.href = `/recommend?selected_books=${query}`;
+                fetch('/get_recommendations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ selected_books: selectedBooks })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    displayRecommendations(data.recommended_books);
+                })
+                .catch(error => console.error('Error:', error));
             }
+        }
+
+        function displayRecommendations(recommendedBooks) {
+            let resultDiv = document.getElementById("recommendationResults");
+            resultDiv.innerHTML = "<h2 class='text-navy'>Recommended Books</h2>";
+
+            let bookGrid = document.createElement("div");
+            bookGrid.classList.add("book-grid");
+
+            recommendedBooks.forEach(book => {
+                let bookCard = document.createElement("div");
+                bookCard.classList.add("book-card");
+
+                let img = document.createElement("img");
+                img.src = book.image;
+                img.alt = "Book Cover";
+
+                let bookInfo = document.createElement("div");
+                bookInfo.classList.add("book-info");
+
+                let title = document.createElement("p");
+                title.classList.add("text-navy");
+                title.style.fontSize = "16px";
+                title.textContent = book.title;
+
+                let author = document.createElement("h5");
+                author.textContent = book.author;
+
+                bookInfo.appendChild(title);
+                bookInfo.appendChild(author);
+                bookCard.appendChild(img);
+                bookCard.appendChild(bookInfo);
+                bookGrid.appendChild(bookCard);
+            });
+
+            resultDiv.appendChild(bookGrid);
+        }
+
+        function resetSelection() {
+            selectedBooks = []; // เคลียร์รายชื่อหนังสือที่เลือก
+            document.querySelectorAll(".book-card").forEach(card => {
+                card.classList.remove("selected"); // ลบ highlight ออกจากหนังสือ
+            });
+            document.getElementById("recommendBtn").disabled = true; // ปิดปุ่ม Get Recommendations
+            document.getElementById("recommendationResults").innerHTML = ""; // เคลียร์ผลลัพธ์
         }
     </script>
 
